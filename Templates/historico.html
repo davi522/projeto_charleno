@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico - Gerador de IA{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-red-600 bg-clip-text text-transparent">
+                    📜 Histórico de Gerações
+                </h1>
+                <p class="text-gray-200 mt-2">
+                    Veja todas as suas criações anteriores
+                </p>
+            </div>
+            
+            <a href="/" class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-all">
+                ← Voltar
+            </a>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-black-600 rounded-lg p-6 shadow-lg border-l-4 border-r-4 border-red-500 text-center">
+                <div class="text-3xl mb-2">📊</div>
+                <div class="text-2xl font-bold text-gray-200">{{ total or 0 }}</div>
+                <div class="text-sm text-gray-200">Total de Gerações</div>
+            </div>
+            
+            <div class="bg-black-600 rounded-lg p-6 shadow-lg border-l-4 border-r-4 border-red-500 text-center">
+                <div class="text-3xl mb-2">🤖</div>
+                <div class="text-2xl font-bold text-gray-200">Gemini 2.5</div>
+                <div class="text-sm text-gray-200">Modelo de IA</div>
+            </div>
+            
+            <div class="bg-black-600 rounded-lg p-6 shadow-lg border-r-4 border-red-500 border-l-4 border-red-500 text-center">
+                <div class="text-3xl mb-2">⚡</div>
+                <div class="text-2xl font-bold text-gray-200">Flash</div>
+                <div class="text-sm text-gray-200">Modo Rápido</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if not total %}
+    
+    <!-- Estado Vazio -->
+    <div class="bg-black-600 rounded-2xl shadow-lg p-12 border-4 border-red-600 text-center">
+        <div class="text-6xl mb-4">📭</div>
+        <h2 class="text-2xl font-bold text-gray-200 mb-2">
+            Nenhuma geração ainda
+        </h2>
+        <p class="text-gray-200 mb-6">
+            Comece criando sua primeira geração com IA!
+        </p>
+        <a href="/" class="inline-block px-8 py-3 bg-black-600 border-r-4 border-l-4 border-red-600 text-white font-semibold rounded-lg hover:bg-red-600  transition-all">
+            ✨ Criar Primeira Geração
+        </a>
+    </div>
+    
+    {% else %}
+    
+    <!-- Lista de Interações -->
+    <div class="space-y-6">
+        {% for interacao in interacoes %}
+        <div class="interacao-card bg-black-600 rounded-xl shadow-lg hover:shadow-2xl transition-all overflow-hidden border-4 border-red-600">
+            
+            <!-- Header da Interação -->
+            <div class="bg-black-600 p-3 border-b border-red-600">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="px-3 py-1 bg-black-600 border border-red-600 text-white text-sm font-semibold rounded-full">
+                            #{{ interacao.id }}
+                        </span>
+                        <span class="px-3 py-1 bg-black-600 border border-red-600 text-white text-sm font-medium rounded-full">
+                            {{ interacao.categoria }}
+                        </span>
+                    </div>
+                    <span class="text-sm text-gray-200">
+                        🕐 {{ interacao.timestamp }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Conteúdo da Interação -->
+            <div class="p-6 space-y-4">
+                
+                <!-- Input do Usuário -->
+                <div>
+                    <div class="flex items-center mb-2">
+                        <span class="text-xl mr-2">👤</span>
+                        <h3 class="font-semibold text-gray-200">Você perguntou:</h3>
+                    </div>
+                    <p class="text-gray-800 bg-gray-50 p-3 rounded-lg border-l-4 border-r-4 border-red-600">
+                        {{ interacao.usuario_input }}
+                    </p>
+                </div>
+                
+                <!-- Resposta da IA -->
+                <div>
+                    <div class="flex items-center mb-2">
+                        <span class="text-xl mr-2">🤖</span>
+                        <h3 class="font-semibold text-gray-200">IA respondeu:</h3>
+                    </div>
+                    <div class="text-gray-800 bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-r-4 border-red-600 whitespace-pre-wrap">
+                        {{ interacao.ia_resposta }}
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Footer com Ações -->
+            <div class="bg-black-600 p-4 border-t border-red-600 flex gap-3">
+                <button 
+                    onclick="copiarResposta({{ interacao.id }})"
+                    class="px-4 py-2 bg-black-600  border-l-4 border-r-4 border-red-600 text-white font-medium rounded-lg hover:bg-red-600 transition-all text-sm"
+                    id="btn-copiar-{{ interacao.id }}"
+                    type="button"
+                >
+                    📋 Copiar
+                </button>
+                
+                <button 
+                    onclick="reutilizarPrompt({{ interacao.usuario_input | tojson }})"
+                    class="px-4 py-2 bg-black-600 border-l-4 border-r-4 border-red-600 text-white font-medium rounded-lg hover:bg-red-600 transition-all text-sm"
+                    type="button"
+                >
+                    🔄 Reutilizar Prompt
+                </button>
+            </div>
+            
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Ação para Limpar Histórico -->
+    <div class="mt-8 text-center">
+        <button 
+            onclick="limparHistorico()"
+            class="px-6 py-3 bg-black-600 border-l-4 border-r-4 border-red-600 text-white font-semibold rounded-lg hover:bg-red-600 transition-all"
+            type="button"
+        >
+            🗑️ Limpar Todo Histórico
+        </button>
+    </div>
+    
+    {% endif %}
+    
+</div>
+{% endblock %}  
+
+{% block extra_scripts %}
+<script>
+    // Copiar resposta segura
+    function copiarResposta(id) {
+        const card = document.querySelector(`#btn-copiar-${id}`).closest('.interacao-card');
+        if (!card) return;
+
+        const respostaEl = card.querySelector('.whitespace-pre-wrap');
+        if (!respostaEl) return;
+
+        const resposta = respostaEl.textContent.trim();
+        navigator.clipboard.writeText(resposta).then(() => {
+            const btn = document.getElementById(`btn-copiar-${id}`);
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado!';
+            btn.classList.replace('bg-indigo-100', 'bg-green-100');
+            btn.classList.replace('text-indigo-700', 'text-green-700');
+
+            setTimeout(() => {
+                btn.innerHTML = textoOriginal;
+                btn.classList.replace('bg-green-100', 'bg-indigo-100');
+                btn.classList.replace('text-green-700', 'text-indigo-700');
+            }, 2000);
+        }).catch(err => alert('Erro ao copiar: ' + err));
+    }
+
+    // Reutilizar prompt seguro
+    function reutilizarPrompt(prompt) {
+        localStorage.setItem('reutilizar_prompt', prompt);
+        window.location.href = '/';
+    }
+
+    // Preencher prompt na home se existir
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.location.pathname === '/') {
+            const promptSalvo = localStorage.getItem('reutilizar_prompt');
+            const inputEl = document.getElementById('user_input');
+            const charCountEl = document.getElementById('char-count');
+
+            if (promptSalvo && inputEl && charCountEl) {
+                inputEl.value = promptSalvo;
+                charCountEl.textContent = promptSalvo.length;
+                localStorage.removeItem('reutilizar_prompt');
+            }
+        }
+
+        // Animação de entrada dos cards
+        const cards = document.querySelectorAll('.interacao-card');
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        cards.forEach(card => observer.observe(card));
+    });
+
+    // Limpar histórico
+    async function limparHistorico() {
+        if (!confirm('⚠️ Tem certeza que deseja limpar TODO o histórico? Esta ação não pode ser desfeita!')) return;
+        try {
+            const response = await fetch('/limpar-historico', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+            if (response.ok) {
+                alert('✅ Histórico limpo com sucesso!');
+                location.reload();
+            } else {
+                alert('❌ Erro ao limpar histórico');
+            }
+        } catch (error) {
+            alert('❌ Erro: ' + error);
+        }
+    }
+</script>
+{% endblock %}
