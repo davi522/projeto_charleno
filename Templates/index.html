@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Início - Gerador de Piadas{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <!-- 🎯 Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-red-600  to-red-600 bg-clip-text text-transparent">
+            {{ titulo }}
+        </h1>
+        <p class="text-xl text-gray-200 mb-8">
+            {{ descricao }}
+        </p>
+        
+        <!-- 🎨 Badges decorativos -->
+    <div class="flex flex-wrap justify-center gap-3 mb-8">
+         <span class="px-4 py-2 bg-neutral-900 text-red-500 border border-red-600 rounded-full text-sm font-medium">
+           🤖 Powered by Gemini AI
+         </span>
+         <span class="px-4 py-2 bg-neutral-900 text-orange-500 border border-red-600 rounded-full text-sm font-medium">
+        ⚡ Super Rápido
+        </span>
+        <span class="px-4 py-2 bg-neutral-900 text-red-500 border border-red-600 rounded-full text-sm font-medium">
+        ✨ 100% Criativo
+        </span>
+    </div>
+    </div>
+    
+    <!-- 📝 Formulário Principal -->
+    <div class="bg-black-600 border-4 border-red-600 rounded-2xl shadow-2xl p-8 mb-8">
+        <form action="/processar" method="POST" id="form-principal" class="space-y-6">
+            
+            <!-- Input de Texto -->
+            <div>
+                <label for="user_input" class="block text-sm font-semibold text-gray-200 mb-2">
+                    💭 O que você quer criar hoje?
+                </label>
+                <textarea 
+                    id="user_input"
+                    name="user_input" 
+                    rows="5"
+                    required
+                    minlength="3"
+                    maxlength="500"
+                    placeholder="Exemplo: Crie uma piada sobre um menino..."
+                    class="w-full px-4 py-3 text-gray-800 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-transparent transition-all resize-none"
+                ></textarea>
+                <p class="mt-2 text-sm text-gray-200">
+                    <span id="char-count">0</span> / 500 caracteres
+                </p>
+            </div>
+            
+            <!-- Controle de Temperatura -->
+            <div>
+                <label for="temperatura" class="block text-sm font-semibold text-gray-200 mb-2">
+                    🌡️ Nível de Criatividade: <span id="temp-value" class="text-red-600">0.9</span>
+                </label>
+                <input 
+                    type="range" 
+                    id="temperatura"
+                    name="temperatura"
+                    min="0.1" 
+                    max="1.0" 
+                    step="0.1" 
+                    value="0.9"
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                >
+                <div class="flex justify-between text-xs text-gray-200 mt-1">
+                    <span>❄️ Focado</span>
+                    <span>🔥 Criativo</span>
+                </div>
+                <p class="mt-2 text-sm text-gray-200">
+                    <strong>Dica:</strong> Valores baixos = respostas mais previsíveis | Valores altos = mais criatividade!
+                </p>
+            </div>
+            
+            <!-- Botão de Envio -->
+            <div class="flex gap-4">
+                <button 
+                    type="submit"
+                    class="flex-1 bg-gradient-to-r from-red-700 via-orange-500 to-red-700 text-white font-bold py-4 px-8 rounded-lg hover:from-orange-500 hover:via-red-700 hover:to-orange-500 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                >
+                    <span id="btn-text">✨ Gerar com IA</span>
+                    <span id="btn-loading" class="hidden">
+                        <svg class="animate-spin h-5 w-5 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Gerando...
+                    </span>
+                </button>
+                
+                <button 
+                    type="reset"
+                    class="px-6 py-4 bg-gradient-to-r from-red-700 via-orange-500 to-red-700 text-gray-700 font-medium rounded-lg hover:bg-orange-500 hover:via-red-700 hover:to-orange-500 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                >
+                    🔄 Limpar
+                </button>
+            </div>
+        </form>
+    </div>
+    
+      
+    <!-- 📊 Estatísticas (se tiver dados) -->
+    {% if total_interacoes is defined and total_interacoes > 0 %}
+    <div class="text-center text-gray-600">
+        <p class="text-sm">
+            🎉 Já geramos <strong class="text-red-600">{{ total_interacoes }}</strong> criações incríveis!
+        </p>
+    </div>
+    {% endif %}
+    
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Contador de caracteres
+    const textarea = document.getElementById('user_input');
+    const charCount = document.getElementById('char-count');
+    
+    textarea.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+    
+    // Atualizar display de temperatura
+    const tempSlider = document.getElementById('temperatura');
+    const tempValue = document.getElementById('temp-value');
+    
+    tempSlider.addEventListener('input', function() {
+        tempValue.textContent = this.value;
+    });
+    
+    // Função para preencher exemplos
+    function preencherExemplo(texto) {
+        textarea.value = texto;
+        charCount.textContent = texto.length;
+        textarea.focus();
+        
+        // Scroll suave para o formulário
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Loading ao enviar formulário
+    const form = document.getElementById('form-principal');
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+    
+    form.addEventListener('submit', function() {
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+    });
+</script>
+{% endblock %}
